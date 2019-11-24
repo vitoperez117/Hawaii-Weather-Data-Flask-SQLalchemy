@@ -36,6 +36,8 @@ engine.execute("SELECT * from measurement").keys()
 #Or, use
 #Base.metadata.tables.values()
 
+### PRECIPITATION DATA ###
+
 #Find Most Recent Date
 session.query(Measurement.date).order_by(Measurement.date.desc()).all()
 
@@ -64,5 +66,42 @@ prcp_12month_df = prcp_12month_df.set_index('date')
 prcp_12month_df = prcp_12month_df.sort_values(by = 'date')
 
 # Use Pandas Plotting with Matplotlib to plot the data
+prcp_plot = prcp_12month_df.plot(subplots = True, figsize = (12,8), use_index = True)
+prcp_plot
+
+# Using Matplotlib to plot data
 x_axis = prcp_12month_df.index
 y_axis = prcp_12month_df ['prcp']
+
+fig, ax = plt.subplots(figsize = (12,8))
+
+ax.plot(x_axis, y_axis)
+
+plt.xlabel("Days")
+plt.ylabel("Precipitation")
+plt.title("Precipitation levels over 1 year")
+plt.savefig("Precipitation levels over 1 year.png")
+plt.show()
+
+# Use Pandas to calculate the summary statistics for the precipitation data
+prcp_12month_df.describe()
+
+
+### STATION DATA ###
+
+# Design a query to show how many stations are available in this dataset
+engine.execute("SELECT * from station").keys()
+stations = [i for i in session.query(Station.station).distinct()]
+#stations
+
+# What are the most active stations? (i.e. what stations have the most rows)?
+# List the stations and the counts in descending order.
+results = session.query(Station.station).\
+filter(Station.station == Measurement.station).order_by(Station.station).all()
+
+keys = Counter(results).keys()
+values = sorted(Counter(results).values(), reverse = True)
+
+most_active_stations = zip(keys,values)
+for a, b in most_active_stations:
+    print(a,b)
