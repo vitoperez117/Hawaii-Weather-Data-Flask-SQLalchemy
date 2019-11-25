@@ -96,12 +96,6 @@ stations = [i for i in session.query(Station.station).distinct()]
 
 # What are the most active stations? (i.e. what stations have the most rows)?
 # List the stations and the counts in descending order.
-results = session.query(Station.station).\
-filter(Station.station == Measurement.station).order_by(Station.station).all()
-
-keys = Counter(results).keys()
-values = sorted(Counter(results).values(), reverse = True)
-
-most_active_stations = zip(keys,values)
-for a, b in most_active_stations:
-    print(a,b)
+session.query(Measurement.station, func.count(Measurement.station)).\
+group_by(Measurement.station).\
+order_by(Measurement.station.desc()).all()
