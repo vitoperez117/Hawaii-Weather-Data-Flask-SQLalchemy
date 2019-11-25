@@ -96,10 +96,17 @@ stations = [i for i in session.query(Station.station).distinct()]
 
 # What are the most active stations? (i.e. what stations have the most rows)?
 # List the stations and the counts in descending order.
-session.query(Station.station, func.count(Measurement.station)).\
-group_by(Measurement.station).\
+a = session.query(Station.station, func.count(Measurement.station)).\
 filter(Measurement.station == Station.station).\
+group_by(Measurement.station).\
 order_by(func.count(Measurement.station).desc()).all()
+
+most_active = a[0][0]
+
+# Using the station id from the previous query, calculate the lowest temperature recorded, 
+# highest temperature recorded, and average temperature of most active station
+session.query(Measurement.station, func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+filter(Measurement.station == most_active).all()
 
 # This function called `calc_temps` will accept start date and end date in the format '%Y-%m-%d' 
 # and return the minimum, average, and maximum temperatures for that range of dates
