@@ -26,6 +26,8 @@ session = Session(engine)
 # List all routes that are available.
 
 #12 month timeframe
+start_date = '2016-08-23'
+end_date = '2017-01-01'
 start_end = Measurement.date.between('2016-08-23','2017-08-23')
 
 app = Flask(__name__)
@@ -79,10 +81,48 @@ def temp():
         temp_12month_dict["station"] = station
         temp_12month_dict["tobs"] = tobs
         temp_12month_ls.append(temp_12month_dict)
-        
+
     return jsonify(temp_12month_ls)
 
 
+@app.route('/api/v1.0/start')
+def temp_time():
+    temp_start = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).group_by(Measurement.date).all()
+    
+    session.close()
 
+    temp_start_ls = []
+    for date, min_temp, max_temp, avg_temp in temp_start:
+        temp_start_dict = {}
+        temp_start_dict["date"] = date
+        temp_start_dict["min_temp"] = min_temp
+        temp_start_dict["max_temp"] = max_temp
+        temp_start_dict["avg_temp"] = avg_temp
+        temp_start_ls.append(temp_start_dict)
+
+    return jsonify(temp_start_ls)
+
+
+@app.route('/api/v1.0/start/end')
+def temp_time_start_end():
+    temp_start_end = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).\
+            filter(Measurement.date <= end_date).\
+                group_by(Measurement.date).all()
+
+    session.close()
+
+    temp_start_end_ls = []
+    for date, min_temp, max_temp, avg_temp in temp_start_end:
+        temp_start_end_dict = {}
+        temp_start_end_dict["date"] = date
+        temp_start_end_dict["min_temp"] = min_temp
+        temp_start_end_dict["max_temp"] = max_temp
+        temp_start_end_dict["avg_temp"] = avg_temp
+        temp_start_end_ls.append(temp_start_end_dict)
+
+    return jsonify(temp_start_end_ls)
+    
 if __name__ == '__main__':
     app.run(debug=True)
