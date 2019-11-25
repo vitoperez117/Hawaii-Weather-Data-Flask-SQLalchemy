@@ -96,6 +96,33 @@ stations = [i for i in session.query(Station.station).distinct()]
 
 # What are the most active stations? (i.e. what stations have the most rows)?
 # List the stations and the counts in descending order.
-session.query(Measurement.station, func.count(Measurement.station)).\
+session.query(Station.station, func.count(Measurement.station)).\
 group_by(Measurement.station).\
-order_by(Measurement.station.desc()).all()
+filter(Measurement.station == Station.station).\
+order_by(func.count(Measurement.station).desc()).all()
+
+# This function called `calc_temps` will accept start date and end date in the format '%Y-%m-%d' 
+# and return the minimum, average, and maximum temperatures for that range of dates
+start = start_date.strftime('%Y-%m-%d')
+end = end_date[0]
+def calc_temps(start_date, end_date):
+    
+    return session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
+
+# function usage example
+print(calc_temps(start, end))
+
+# Design a query to retrieve the last 12 months of temperature observation data (tobs).
+# Filter by the station with the highest number of observations.
+# Plot the results as a histogram with bins=12.
+x = session.query(Measurement.tobs).\
+filter(Measurement.date >= start).\
+filter(Measurement.date <= end).\
+filter(Measurement.station == most_active).all()
+
+temp_12_months = np.asarray(x)
+plt.hist(temp_12_months, bins = 12)
+plt.ylabel("Frequency")
+plt.xlabel("Temperature (F)")
+plt.title("Frequencies of Temperature Values Observed over 12 months")
