@@ -1,4 +1,4 @@
-# SQLAlchemy-Challenge
+# Hawaii-Weather-Data-Flask-SQLAlchemy
 
 ## Contents
 
